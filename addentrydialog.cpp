@@ -167,6 +167,8 @@ QWidget* AddEntryDialog::buildTodoPage() {
     endDT   = new QDateTimeEdit(QDateTime(date, QTime(10,0)), panel);
     startDT->setCalendarPopup(true);
     endDT->setCalendarPopup(true);
+    startDT->setWrapping(true);
+    endDT->setWrapping(true);
 
     auto rowS = new QHBoxLayout();
     rowS->addWidget(new QLabel("開始", panel));
@@ -314,9 +316,9 @@ void AddEntryDialog::applyStyle() {
 
         QDateTimeEdit { background: %3; border: 1px solid #2A2A2A; border-radius: 10px; padding: 8px; color: %2; }
 
-        QDateTimeEdit::up-button { width: 35px; background-color: #555 !important; border-top-right-radius: 10px; }
-        QDateTimeEdit::down-button { width: 35px; background-color: #555 !important; border-bottom-right-radius: 10px; }
-)").arg(BG.name(), TEXT.name(), PANEL.name()));
+        QDateTimeEdit::up-button { width: 40px; background: #444; border: 1px solid #666; }
+        QDateTimeEdit::down-button { width: 40px; background: #444; border: 1px solid #666; }
+    )").arg(BG.name(), TEXT.name(), PANEL.name()));
 }
 void AddEntryDialog::setInitialTitle(const QString &title) {
     if (todoTitle) {
