@@ -306,22 +306,57 @@ QWidget* MainWindow::buildBottomBar() {
 
     // ✅ 設定預算（寫進當天 json）
     connect(btnBook, &QToolButton::clicked, this, [=]{
-        bool ok = false;
-        double b = QInputDialog::getDouble(
-            this, "設定預算", "本月預算：",
-            account.getMonthlyBudget(),
-            0, 1e9, 0, &ok
-            );
-        if (!ok) return;
+        // 1) 先切回「記帳頁」
+        if (stack) stack->setCurrentIndex(0);
+        refreshDayList(currentDate);
 
-        account.setMonthlyBudget(b);
-        if (!account.saveToFile(currentDate)) {
-            QMessageBox::warning(this, "存檔失敗", "預算無法寫入檔案 data/...");
+        // 2) 選單：設定 / 重設
+        QMenu menu;
+        QAction *actSet   = menu.addAction("設定本月預算");
+        QAction *actReset = menu.addAction("重設本月預算（清空）");
+
+        QAction *act = menu.exec(btnBook->mapToGlobal(QPoint(btnBook->width()/2, btnBook->height())));
+        if (!act) return;
+
+        if (act == actSet) {
+            bool ok = false;
+            double b = QInputDialog::getDouble(
+                this,
+                "設定預算",
+                "本月預算：",
+                account.getMonthlyBudget(),
+                0, 1e9, 0,
+                &ok
+                );
+            if (!ok) return;
+
+            account.setMonthlyBudget(b);
+
+            if (!account.saveToFile(currentDate)) {
+                QMessageBox::warning(this, "存檔失敗", "預算無法寫入檔案 data/...");
+                return;
+            }
+
+            refreshMonthSummary(currentDate);
+            checkBudgetWarning(currentDate);
             return;
         }
 
-        refreshMonthSummary(currentDate);
-        checkBudgetWarning(currentDate);
+        if (act == actReset) {
+            if (QMessageBox::question(this, "重設預算", "確定要清空本月預算？") != QMessageBox::Yes)
+                return;
+
+            account.setMonthlyBudget(0);
+
+            if (!account.saveToFile(currentDate)) {
+                QMessageBox::warning(this, "存檔失敗", "預算無法寫入檔案 data/...");
+                return;
+            }
+
+            refreshMonthSummary(currentDate);
+            // 清空後不需要 warning
+            return;
+        }
     });
 
     // ✅ 新增（記帳/待辦）
