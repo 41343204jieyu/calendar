@@ -58,8 +58,9 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     refreshDayList(QDate::currentDate());
-    refreshCalendarMarks();
     loadTodosFromFile(); // 啟動時自動從todos.txt讀取資料
+    refreshCalendarMarks();
+
 }
 
 QWidget* MainWindow::buildTopTitle() {
@@ -162,6 +163,7 @@ QWidget* MainWindow::buildBottomBar() {
 
         connect(&dlg, &AddEntryDialog::savedTodo, this, [=](const Todo& td){
             todos.push_back(td);
+            saveTodosToFile();        // 寫入硬碟永久保存
             refreshCalendarMarks();
             saveTodosToFile(); // 按下儲存鈕時 立刻把資料寫進 todos.txt
         });
