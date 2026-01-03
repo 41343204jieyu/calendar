@@ -11,6 +11,8 @@
 #include <QFrame>
 #include <QFile>
 #include <QTextStream>
+#include <QMenu>   // 解決 QMenu 報錯
+#include <QAction> // 解決選單動作的報錯
 
 
 static const QColor BG("#0B0B0B");
@@ -46,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(root);
 
     applyStyle();
-
+    list->setContextMenuPolicy(Qt::CustomContextMenu); // 允許清單跳出右鍵選單
     monthTitle->setText(monthTitleZh(cal->yearShown(), cal->monthShown()));
 
     connect(cal, &QCalendarWidget::clicked, this, [=](const QDate &d){
@@ -56,7 +58,33 @@ MainWindow::MainWindow(QWidget *parent)
     connect(cal, &QCalendarWidget::currentPageChanged, this, [=](int y, int m){
         monthTitle->setText(monthTitleZh(y, m));
     });
+    // 當使用者在清單上點右鍵時發動
+    connect(list, &QListWidget::customContextMenuRequested, this, [=](const QPoint &pos){
+        QListWidgetItem *item = list->itemAt(pos);
+        if (!item) return; // 如果點的地方沒東西就直接結束
 
+        QMenu menu(this);
+        QAction *delAct = menu.addAction("刪除這項提醒");
+        QAction *selected = menu.exec(list->mapToGlobal(pos));
+
+        if (selected == delAct) {
+            // 取得該項目的標題
+            QString title = item->text().split(" (")[0].replace(" [待辦] ", "");
+
+            // 從 todos 陣列中移除該項目
+            for (int i = 0; i < todos.size(); ++i) {
+                if (todos[i].title == title) {
+                    todos.removeAt(i);
+                    break;
+                }
+            }
+
+            // --- 2 號核心：同步動作 ---
+            saveTodosToFile();      // 1. 同步更新檔案
+            refreshCalendarMarks(); // 2. 重新整理日曆小白點
+            refreshDayList(cal->chosenDate()); // 3. 重新整理下方清單
+        }
+    });
     refreshDayList(QDate::currentDate());
     loadTodosFromFile(); // 啟動時自動從todos.txt讀取資料
     refreshCalendarMarks();
