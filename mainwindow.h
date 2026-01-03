@@ -25,7 +25,8 @@ private:
 
     void refreshDayList(const QDate& d);
     void refreshCalendarMarks();
-
+    void saveTodosToFile();   // 存檔
+    void loadTodosFromFile(); // 讀檔
 private:
     DotCalendar *cal = nullptr;
     QLabel *monthTitle = nullptr;

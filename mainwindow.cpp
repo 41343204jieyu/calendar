@@ -9,6 +9,9 @@
 #include <QListWidget>
 #include <QToolButton>
 #include <QFrame>
+#include <QFile>
+#include <QTextStream>
+
 
 static const QColor BG("#0B0B0B");
 static const QColor PANEL("#141414");
@@ -56,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     refreshDayList(QDate::currentDate());
     refreshCalendarMarks();
+    loadTodosFromFile(); // 啟動時自動從todos.txt讀取資料
 }
 
 QWidget* MainWindow::buildTopTitle() {
@@ -159,6 +163,7 @@ QWidget* MainWindow::buildBottomBar() {
         connect(&dlg, &AddEntryDialog::savedTodo, this, [=](const Todo& td){
             todos.push_back(td);
             refreshCalendarMarks();
+            saveTodosToFile(); // 按下儲存鈕時 立刻把資料寫進 todos.txt
         });
 
         dlg.exec();
@@ -228,4 +233,36 @@ void MainWindow::applyStyle() {
         QListWidget { background: transparent; border: none; }
         QListWidget::item { padding: 10px; border-bottom: 1px solid #1E1E1E; color: %2; }
     )").arg(BG.name(), TEXT.name(), PANEL.name()));
+}
+
+void MainWindow::saveTodosToFile() {
+    QFile file("todos.txt");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        for (const auto &td : todos) {
+            out << td.title << "|"
+                << td.start.toString(Qt::ISODate) << "|"
+                << (td.allDay ? "1" : "0") << "\n";
+        }
+        file.close();
+    }
+}
+
+void MainWindow::loadTodosFromFile() {
+    QFile file("todos.txt");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        QStringList parts = line.split("|");
+        if (parts.size() >= 3) {
+            Todo td;
+            td.title = parts[0];
+            td.start = QDateTime::fromString(parts[1], Qt::ISODate);
+            td.allDay = (parts[2] == "1");
+            todos.push_back(td);
+        }
+    }
+    file.close();
 }
