@@ -38,6 +38,14 @@ public:
 
     const QVector<AccountItem>& getItems() const { return m_items; }
 
+    bool updateAt(int idx, const AccountItem& item);
+
+
+    bool loadMonthlyBudget(int year, int month);
+    bool saveMonthlyBudget(int year, int month) const;
+
+
+
 private:
     QVector<AccountItem> m_items;
     double m_monthlyBudget = 0.0;

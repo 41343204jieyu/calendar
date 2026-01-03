@@ -2,7 +2,7 @@
 #include <QString>
 #include <QDate>
 #include <QDateTime>
-
+#include <QStack>
 struct Txn {
     QDate date;
     QString category;

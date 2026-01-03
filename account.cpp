@@ -163,3 +163,52 @@ bool Account::saveToFile(const QDate &date) const
     file.close();
     return true;
 }
+
+#include <QJsonDocument>
+#include <QJsonObject>
+
+// ✅ 覆蓋某筆（給右鍵修改用）
+bool Account::updateAt(int idx, const AccountItem &item)
+{
+    if (idx < 0 || idx >= m_items.size()) return false;
+    m_items[idx] = item;
+    return true;
+}
+
+// ===== 月預算：獨立檔案 =====
+static QString budgetFilePath(int year, int month)
+{
+    QDir dir("data");
+    if (!dir.exists()) dir.mkpath(".");
+    return QString("data/budget_%1-%2.json")
+        .arg(year)
+        .arg(month, 2, 10, QChar('0'));
+}
+
+bool Account::loadMonthlyBudget(int year, int month)
+{
+    QFile f(budgetFilePath(year, month));
+    if (!f.open(QIODevice::ReadOnly)) return false;
+
+    QJsonDocument doc = QJsonDocument::fromJson(f.readAll());
+    f.close();
+
+    QJsonObject obj = doc.object();
+    if (!obj.contains("monthly_budget")) return false;
+
+    m_monthlyBudget = obj["monthly_budget"].toDouble();
+    return true;
+}
+
+bool Account::saveMonthlyBudget(int year, int month) const
+{
+    QJsonObject obj;
+    obj["monthly_budget"] = m_monthlyBudget;
+
+    QFile f(budgetFilePath(year, month));
+    if (!f.open(QIODevice::WriteOnly)) return false;
+
+    f.write(QJsonDocument(obj).toJson());
+    f.close();
+    return true;
+}
