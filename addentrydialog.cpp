@@ -10,6 +10,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QDateTimeEdit>
+#include <QLineEdit>
 
 static const QColor BG("#0B0B0B");
 static const QColor PANEL("#141414");
@@ -313,4 +314,9 @@ void AddEntryDialog::applyStyle() {
 
         QDateTimeEdit { background: %3; border: 1px solid #2A2A2A; border-radius: 10px; padding: 8px; color: %2; }
     )").arg(BG.name(), TEXT.name(), PANEL.name()));
+}
+void AddEntryDialog::setInitialTitle(const QString &title) {
+    if (todoTitle) {
+        todoTitle->setText(title);
+    }
 }

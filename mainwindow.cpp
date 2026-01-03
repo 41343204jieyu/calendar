@@ -63,7 +63,8 @@ MainWindow::MainWindow(QWidget *parent)
         QListWidgetItem *item = list->itemAt(pos);
         if (!item) return;
         QMenu menu(this);
-        QAction *delAct = menu.addAction("刪除這項提醒");
+        QAction *delAct = menu.addAction("刪除提醒");
+        QAction *editAct = menu.addAction("修改提醒");
         QAction *selected = menu.exec(list->mapToGlobal(pos));
 
         if (selected == delAct) {
@@ -80,9 +81,22 @@ MainWindow::MainWindow(QWidget *parent)
             //同步
             saveTodosToFile();      // 同步更新檔案
             refreshCalendarMarks(); // 重整日曆小白點和下面的清單
-            refreshDayList(cal->chosenDate());
-        }
-    });
+            refreshDayList(cal->chosenDate());}
+        else if (selected == editAct) {
+                QString title = item->text().split(" (")[0].replace("[待辦] ", "");
+
+                for (int i = 0; i < todos.size(); ++i) {
+                    if (todos[i].title == title) {
+                        todos.removeAt(i);
+                        break;
+                    }
+                }
+                AddEntryDialog dlg(cal->chosenDate(), this);
+                dlg.setInitialTitle(title);
+                dlg.exec();
+            }
+        });
+
     refreshDayList(QDate::currentDate());
     loadTodosFromFile(); // 啟動時自動從todos.txt讀取資料
     refreshCalendarMarks();

@@ -16,7 +16,7 @@ class AddEntryDialog : public QDialog {
 public:
     enum Page { Expense=0, Income=1, TodoPage=2 };
     explicit AddEntryDialog(const QDate& selectedDate, QWidget *parent=nullptr);
-
+    void setInitialTitle(const QString &title);
 signals:
     void savedExpenseIncome(const Txn& t);
     void savedTodo(const Todo& td);
