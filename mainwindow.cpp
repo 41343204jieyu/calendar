@@ -186,6 +186,13 @@ void MainWindow::refreshDayList(const QDate &d) {
     }
 
     sumLabel->setText(QString("支出:%1").arg(sumExpense));
+    // 2.顯示待辦事項
+    for (const auto &td : todos) {
+        if (td.start.date() == d) {
+            QString timeStr = td.allDay ? "全天" : td.start.toString("hh:mm");
+            list->addItem(QString(" [待辦] %1 (%2)").arg(td.title).arg(timeStr));
+        }
+    }
 }
 
 void MainWindow::refreshCalendarMarks() {
