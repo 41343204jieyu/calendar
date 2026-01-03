@@ -314,11 +314,13 @@ void AddEntryDialog::applyStyle() {
         QComboBox { background: %3; border: 1px solid #2A2A2A; border-radius: 10px; padding: 8px; color: %2; }
         QCheckBox { spacing: 8px; }
 
-        QDateTimeEdit { background: %3; border: 1px solid #2A2A2A; border-radius: 10px; padding: 8px; color: %2; }
-
-        QDateTimeEdit::up-button { width: 40px; background: #444; border: 1px solid #666; }
-        QDateTimeEdit::down-button { width: 40px; background: #444; border: 1px solid #666; }
-    )").arg(BG.name(), TEXT.name(), PANEL.name()));
+        QDateTimeEdit { background: %3; border: 1px solid #2A2A2A; border-radius: 10px; padding: 8px; color: %2;min-width: 160px; }
+        QDateTimeEdit::up-button { subcontrol-origin: border; subcontrol-position: top right; width: 20px; border: none; }
+        "QDateTimeEdit::up-button { width: 20px; background: transparent; border: none; }"
+        "QDateTimeEdit::down-button { width: 20px; background: transparent; border: none; }"
+        "QDateTimeEdit::up-arrow { image: none; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 5px solid white; }"
+        "QDateTimeEdit::down-arrow { image: none; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid white; }"
+    )" ).arg(BG.name(), TEXT.name(), PANEL.name()));
 }
 void AddEntryDialog::setInitialTitle(const QString &title) {
     if (todoTitle) {
