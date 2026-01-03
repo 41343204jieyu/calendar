@@ -86,13 +86,26 @@ MainWindow::MainWindow(QWidget *parent)
             refreshDayList(cal->chosenDate());}
         else if (selected == editAct) {
                 QString title = item->text().split(" (")[0].replace(" [待辦] ", "");
+                if (!item) return;
+                QString id = item->data(Qt::UserRole).toString();
+
+                Todo td;
+                bool found = false;
+                for (const auto &t : todos) {
+                 if (t.id == id) {
+                        td = t;
+                        found = true;
+                        break;
+                    }
+                }
+            if (!found) return; // 沒找到就不開啟編輯
 
                 AddEntryDialog dlg(cal->chosenDate(), this);
-                dlg.setInitialTitle(title);
+                dlg.setTodo(td);
                 connect(&dlg, &AddEntryDialog::savedTodo, this, [=](const Todo& td){
 
                     for (int i = 0; i < todos.size(); ++i) {
-                        if (todos[i].title == title) {
+                        if (todos[i].id == td.id) {
                             todos[i] = td;
                             saveTodosToFile();
                             return;
@@ -248,7 +261,10 @@ void MainWindow::refreshDayList(const QDate &d) {
     for (const auto &td : todos) {
         if (td.start.date() == d) {
             QString timeStr = td.allDay ? "全天" : td.start.toString("hh:mm");
-            list->addItem(QString(" [待辦] %1 (%2)").arg(td.title).arg(timeStr));
+            auto *item = new QListWidgetItem(QString(" [待辦] %1 (%2)").arg(td.title).arg(timeStr));
+            item->setData(Qt::UserRole, td.id);
+            list->addItem(item);
+
         }
     }
 }
@@ -293,8 +309,10 @@ void MainWindow::saveTodosToFile() {
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         for (const auto &td : todos) {
-            out << td.title << "|"
+            out << td.id << "|"
+                << td.title << "|"
                 << td.start.toString(Qt::ISODate) << "|"
+                << td.end.toString(Qt::ISODate) << "|"
                 << (td.allDay ? "1" : "0") << "\n";
         }
         file.close();
@@ -309,11 +327,13 @@ void MainWindow::loadTodosFromFile() {
     while (!in.atEnd()) {
         QString line = in.readLine();
         QStringList parts = line.split("|");
-        if (parts.size() >= 3) {
+        if (parts.size() >= 5) {
             Todo td;
-            td.title = parts[0];
-            td.start = QDateTime::fromString(parts[1], Qt::ISODate);
-            td.allDay = (parts[2] == "1");
+            td.id    = parts[0];
+            td.title = parts[1];
+            td.start = QDateTime::fromString(parts[2], Qt::ISODate);
+            td.end   = QDateTime::fromString(parts[3], Qt::ISODate);
+            td.allDay= (parts[4] == "1");
             todos.push_back(td);
         }
     }

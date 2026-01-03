@@ -11,6 +11,7 @@ struct Txn {
 };
 
 struct Todo {
+    QString id;
     QString title;
     bool allDay = true;
     QDateTime start;

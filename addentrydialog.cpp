@@ -330,3 +330,11 @@ void AddEntryDialog::setInitialTitle(const QString &title) {
         todoTitle->setText(title);
     }
 }
+void AddEntryDialog::setTodo(const Todo& td) {
+    if (!todoTitle || !startDT || !endDT || !allDay) return;
+    editingId = td.id;
+    todoTitle->setText(td.title);
+    allDay->setChecked(td.allDay);
+    startDT->setDateTime(td.start);
+    endDT->setDateTime(td.end);
+}

@@ -17,6 +17,7 @@ public:
     enum Page { Expense=0, Income=1, TodoPage=2 };
     explicit AddEntryDialog(const QDate& selectedDate, QWidget *parent=nullptr);
     void setInitialTitle(const QString &title);
+    void setTodo(const Todo& td);
 signals:
     void savedExpenseIncome(const Txn& t);
     void savedTodo(const Todo& td);
@@ -66,4 +67,5 @@ private:
     QDateTimeEdit *startDT = nullptr;
     QDateTimeEdit *endDT = nullptr;
     QWidget* keypad = nullptr;
+    QString editingId;
 };
